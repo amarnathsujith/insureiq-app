@@ -1,0 +1,4 @@
+age,sex,bmi,children,smoker,region,predicted_charge,submitted_at,submitted_by
+30,male,25.5,0,no,southwest,2314.3452939592626,2026-04-23T19:09:00.584752,amarsujith9294@gmail.com
+34,female,34.0,4,no,southwest,7118.585852497013,2026-04-23T19:09:17.358735,amarsujith9294@gmail.com
+33,male,32.0,4,no,northwest,6485.535283913518,2026-04-23T19:10:43.905463,amarsujith9294@gmail.com
