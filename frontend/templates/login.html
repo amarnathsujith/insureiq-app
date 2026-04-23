@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>InsureIQ — Secure Login</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --blue-950: #0a1628;
+  --blue-900: #0d1f3c;
+  --blue-800: #112d56;
+  --blue-700: #1a3f73;
+  --blue-600: #1d4ed8;
+  --blue-500: #3b82f6;
+  --blue-400: #60a5fa;
+  --blue-300: #93c5fd;
+  --blue-100: #dbeafe;
+  --blue-50:  #eff6ff;
+  --white:    #ffffff;
+  --gray-100: #f1f5f9;
+  --gray-300: #cbd5e1;
+  --gray-400: #94a3b8;
+  --gray-600: #475569;
+  --gray-700: #334155;
+  --success:  #22c55e;
+  --warning:  #f59e0b;
+  --danger:   #ef4444;
+  --radius:   12px;
+  --shadow:   0 25px 50px -12px rgba(0,0,0,0.5);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+body{
+  font-family:'DM Sans',sans-serif;
+  background: linear-gradient(135deg, var(--blue-950) 0%, var(--blue-900) 40%, #0f2848 100%);
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:1.5rem;
+  position:relative;
+  overflow:hidden;
+}
+/* Animated background orbs */
+body::before{
+  content:'';
+  position:fixed;top:-30%;left:-20%;
+  width:600px;height:600px;
+  background:radial-gradient(circle, rgba(59,130,246,0.12) 0%, transparent 70%);
+  animation:float1 8s ease-in-out infinite;
+  pointer-events:none;
+}
+body::after{
+  content:'';
+  position:fixed;bottom:-20%;right:-15%;
+  width:500px;height:500px;
+  background:radial-gradient(circle, rgba(29,78,216,0.15) 0%, transparent 70%);
+  animation:float2 10s ease-in-out infinite;
+  pointer-events:none;
+}
+@keyframes float1{0%,100%{transform:translate(0,0)}50%{transform:translate(30px,-40px)}}
+@keyframes float2{0%,100%{transform:translate(0,0)}50%{transform:translate(-30px,40px)}}
+
+.card{
+  width:100%;max-width:460px;
+  background:rgba(255,255,255,0.04);
+  border:1px solid rgba(96,165,250,0.15);
+  border-radius:20px;
+  backdrop-filter:blur(20px);
+  padding:2.75rem 2.5rem;
+  box-shadow:var(--shadow), inset 0 1px 0 rgba(255,255,255,0.06);
+  position:relative;z-index:1;
+  animation:slideUp 0.5s cubic-bezier(0.16,1,0.3,1) forwards;
+}
+@keyframes slideUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+
+/* Brand */
+.brand{text-align:center;margin-bottom:2rem}
+.brand-icon{
+  width:60px;height:60px;
+  background:linear-gradient(135deg,var(--blue-600),var(--blue-400));
+  border-radius:16px;
+  display:inline-flex;align-items:center;justify-content:center;
+  margin-bottom:1rem;
+  box-shadow:0 0 30px rgba(59,130,246,0.4);
+}
+.brand-icon svg{width:30px;height:30px;color:#fff}
+.brand h1{
+  font-family:'Space Grotesk',sans-serif;
+  font-size:1.75rem;font-weight:700;
+  color:var(--white);letter-spacing:-0.02em;
+}
+.brand p{color:var(--blue-300);font-size:0.875rem;margin-top:0.35rem;font-weight:400}
+
+/* Tabs */
+.tabs{display:flex;background:rgba(255,255,255,0.05);border-radius:10px;padding:4px;margin-bottom:1.75rem;gap:4px}
+.tab-btn{
+  flex:1;padding:0.6rem;border:none;border-radius:7px;
+  font-family:'DM Sans',sans-serif;font-size:0.875rem;font-weight:500;
+  cursor:pointer;transition:all 0.2s;
+  background:transparent;color:var(--gray-400);
+}
+.tab-btn.active{background:var(--blue-600);color:#fff;box-shadow:0 2px 8px rgba(29,78,216,0.4)}
+.tab-btn:hover:not(.active){color:var(--blue-300)}
+
+/* Form */
+.tab-content{display:none}
+.tab-content.active{display:block}
+.form-group{margin-bottom:1.25rem;position:relative}
+.form-group label{
+  display:block;font-size:0.8rem;font-weight:600;
+  color:var(--blue-300);margin-bottom:0.5rem;letter-spacing:0.04em;text-transform:uppercase;
+}
+.input-wrap{position:relative}
+.input-wrap svg{
+  position:absolute;left:14px;top:50%;transform:translateY(-50%);
+  width:16px;height:16px;color:var(--gray-400);pointer-events:none;
+}
+.input-wrap input{
+  width:100%;padding:0.875rem 1rem 0.875rem 2.75rem;
+  background:rgba(255,255,255,0.06);
+  border:1px solid rgba(148,163,184,0.2);
+  border-radius:var(--radius);
+  color:var(--white);font-family:'DM Sans',sans-serif;font-size:0.95rem;
+  transition:all 0.2s;outline:none;
+}
+.input-wrap input::placeholder{color:var(--gray-400)}
+.input-wrap input:focus{
+  border-color:var(--blue-500);
+  background:rgba(59,130,246,0.08);
+  box-shadow:0 0 0 3px rgba(59,130,246,0.15);
+}
+.input-wrap .toggle-pw{
+  position:absolute;right:14px;top:50%;transform:translateY(-50%);
+  background:none;border:none;cursor:pointer;padding:0;
+  color:var(--gray-400);transition:color 0.2s;
+}
+.input-wrap .toggle-pw:hover{color:var(--blue-300)}
+.input-wrap .toggle-pw svg{width:16px;height:16px}
+
+/* Password strength */
+.pw-strength{margin-top:0.6rem}
+.strength-bar{height:4px;border-radius:4px;background:rgba(255,255,255,0.1);overflow:hidden;margin-bottom:0.35rem}
+.strength-fill{height:100%;border-radius:4px;transition:all 0.3s;width:0}
+.strength-label{font-size:0.75rem;font-weight:600}
+.strength-fill.weak{background:var(--danger);width:25%}
+.strength-fill.fair{background:var(--warning);width:50%}
+.strength-fill.good{background:#84cc16;width:75%}
+.strength-fill.strong{background:var(--success);width:100%}
+.strength-label.weak{color:var(--danger)}
+.strength-label.fair{color:var(--warning)}
+.strength-label.good{color:#84cc16}
+.strength-label.strong{color:var(--success)}
+.pw-hints{margin-top:0.4rem}
+.pw-hint{font-size:0.73rem;color:var(--gray-400);display:flex;align-items:center;gap:0.35rem;margin-bottom:0.2rem}
+.pw-hint svg{width:12px;height:12px;flex-shrink:0}
+.pw-hint.met{color:var(--success)}
+.pw-hint.met svg{color:var(--success)}
+
+/* Captcha */
+.captcha-box{
+  background:rgba(255,255,255,0.04);
+  border:1px solid rgba(148,163,184,0.2);
+  border-radius:var(--radius);
+  padding:1rem 1.25rem;
+  display:flex;align-items:center;justify-content:space-between;
+  cursor:pointer;user-select:none;transition:all 0.2s;
+}
+.captcha-box:hover{border-color:var(--blue-500);background:rgba(59,130,246,0.05)}
+.captcha-left{display:flex;align-items:center;gap:0.75rem}
+.captcha-checkbox{
+  width:22px;height:22px;border-radius:5px;
+  border:2px solid var(--gray-400);
+  display:flex;align-items:center;justify-content:center;
+  transition:all 0.3s;flex-shrink:0;
+  background:rgba(255,255,255,0.05);
+}
+.captcha-checkbox.checked{background:var(--blue-600);border-color:var(--blue-600)}
+.captcha-checkbox svg{width:14px;height:14px;color:#fff;display:none}
+.captcha-checkbox.checked svg{display:block}
+.captcha-checkbox.loading{animation:spin 0.8s linear infinite;border-top-color:var(--blue-400)}
+@keyframes spin{to{transform:rotate(360deg)}}
+.captcha-text{color:var(--gray-300);font-size:0.9rem}
+.captcha-logo{font-size:0.65rem;color:var(--gray-400);text-align:right;line-height:1.3}
+.captcha-logo strong{display:block;font-size:0.75rem;color:var(--blue-300)}
+
+/* Errors */
+.field-error{font-size:0.75rem;color:var(--danger);margin-top:0.4rem;display:none}
+.field-error.show{display:block}
+.alert{
+  border-radius:10px;padding:0.875rem 1rem;margin-bottom:1.25rem;
+  font-size:0.875rem;font-weight:500;display:none;
+  animation:fadeIn 0.3s ease;
+}
+@keyframes fadeIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
+.alert.error{background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.3);color:#fca5a5}
+.alert.success{background:rgba(34,197,94,0.12);border:1px solid rgba(34,197,94,0.3);color:#86efac}
+.alert.show{display:block}
+
+/* Submit button */
+.btn-submit{
+  width:100%;padding:0.9rem;margin-top:0.5rem;
+  background:linear-gradient(135deg,var(--blue-600),var(--blue-500));
+  color:#fff;border:none;border-radius:var(--radius);
+  font-family:'DM Sans',sans-serif;font-size:1rem;font-weight:600;
+  cursor:pointer;transition:all 0.2s;
+  display:flex;align-items:center;justify-content:center;gap:0.5rem;
+  position:relative;overflow:hidden;
+}
+.btn-submit::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(255,255,255,0.1),transparent);
+  opacity:0;transition:opacity 0.2s;
+}
+.btn-submit:hover::before{opacity:1}
+.btn-submit:hover{transform:translateY(-1px);box-shadow:0 8px 25px rgba(29,78,216,0.5)}
+.btn-submit:active{transform:translateY(0)}
+.btn-submit:disabled{opacity:0.6;cursor:not-allowed;transform:none}
+.btn-submit .btn-spinner{
+  width:18px;height:18px;
+  border:2px solid rgba(255,255,255,0.3);
+  border-top-color:#fff;border-radius:50%;
+  animation:spin 0.8s linear infinite;display:none;
+}
+.btn-submit.loading .btn-spinner{display:block}
+.btn-submit.loading .btn-text{display:none}
+
+.divider{text-align:center;color:var(--gray-400);font-size:0.8rem;margin:1rem 0;position:relative}
+.divider::before,.divider::after{
+  content:'';position:absolute;top:50%;width:42%;height:1px;
+  background:rgba(148,163,184,0.15);
+}
+.divider::before{left:0}.divider::after{right:0}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="brand">
+    <div class="brand-icon">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+      </svg>
+    </div>
+    <h1>InsureIQ</h1>
+    <p>AI-powered insurance cost predictor</p>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('login')">Sign In</button>
+    <button class="tab-btn" onclick="switchTab('register')">Create Account</button>
+  </div>
+
+  <!-- LOGIN -->
+  <div class="tab-content active" id="tab-login">
+    <div class="alert" id="login-alert"></div>
+    <div class="form-group">
+      <label>Email Address</label>
+      <div class="input-wrap">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,12 2,6"/></svg>
+        <input type="email" id="login-email" placeholder="you@example.com" autocomplete="email">
+      </div>
+      <div class="field-error" id="login-email-err">Please enter a valid email</div>
+    </div>
+    <div class="form-group">
+      <label>Password</label>
+      <div class="input-wrap">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        <input type="password" id="login-password" placeholder="Your password" autocomplete="current-password">
+        <button class="toggle-pw" onclick="togglePw('login-password',this)" type="button">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Security Check</label>
+      <div class="captcha-box" onclick="toggleCaptcha('login')" id="captcha-login">
+        <div class="captcha-left">
+          <div class="captcha-checkbox" id="captcha-login-box">
+            <svg fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <span class="captcha-text">I'm not a robot</span>
+        </div>
+        <div class="captcha-logo"><strong>reCAPTCHA</strong>Privacy · Terms</div>
+      </div>
+      <div class="field-error" id="captcha-login-err">Please complete the security check</div>
+    </div>
+    <button class="btn-submit" id="login-btn" onclick="doLogin()">
+      <div class="btn-spinner"></div>
+      <span class="btn-text">Sign In</span>
+    </button>
+  </div>
+
+  <!-- REGISTER -->
+  <div class="tab-content" id="tab-register">
+    <div class="alert" id="register-alert"></div>
+    <div class="form-group">
+      <label>Email Address</label>
+      <div class="input-wrap">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,12 2,6"/></svg>
+        <input type="email" id="reg-email" placeholder="you@example.com" autocomplete="email">
+      </div>
+      <div class="field-error" id="reg-email-err">Please enter a valid email</div>
+    </div>
+    <div class="form-group">
+      <label>Password</label>
+      <div class="input-wrap">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        <input type="password" id="reg-password" placeholder="Create a strong password" oninput="checkStrength(this.value)" autocomplete="new-password">
+        <button class="toggle-pw" onclick="togglePw('reg-password',this)" type="button">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        </button>
+      </div>
+      <div class="pw-strength">
+        <div class="strength-bar"><div class="strength-fill" id="strength-fill"></div></div>
+        <div class="strength-label" id="strength-label"></div>
+        <div class="pw-hints" id="pw-hints">
+          <div class="pw-hint" id="hint-len">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/></svg>
+            At least 8 characters
+          </div>
+          <div class="pw-hint" id="hint-upper">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/></svg>
+            One uppercase letter
+          </div>
+          <div class="pw-hint" id="hint-num">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/></svg>
+            One number
+          </div>
+          <div class="pw-hint" id="hint-special">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/></svg>
+            One special character (!@#$...)
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Confirm Password</label>
+      <div class="input-wrap">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        <input type="password" id="reg-confirm" placeholder="Repeat your password" autocomplete="new-password">
+      </div>
+      <div class="field-error" id="reg-confirm-err">Passwords do not match</div>
+    </div>
+    <div class="form-group">
+      <label>Security Check</label>
+      <div class="captcha-box" onclick="toggleCaptcha('reg')" id="captcha-reg">
+        <div class="captcha-left">
+          <div class="captcha-checkbox" id="captcha-reg-box">
+            <svg fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <span class="captcha-text">I'm not a robot</span>
+        </div>
+        <div class="captcha-logo"><strong>reCAPTCHA</strong>Privacy · Terms</div>
+      </div>
+      <div class="field-error" id="captcha-reg-err">Please complete the security check</div>
+    </div>
+    <button class="btn-submit" id="register-btn" onclick="doRegister()">
+      <div class="btn-spinner"></div>
+      <span class="btn-text">Create Account</span>
+    </button>
+  </div>
+</div>
+
+<script>
+const captchaState = { login: false, reg: false };
+
+function switchTab(tab) {
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  event.target.classList.add('active');
+}
+
+function togglePw(id, btn) {
+  const input = document.getElementById(id);
+  input.type = input.type === 'password' ? 'text' : 'password';
+}
+
+function toggleCaptcha(id) {
+  if (captchaState[id]) return;
+  const box = document.getElementById('captcha-' + id + '-box');
+  box.classList.add('loading');
+  setTimeout(() => {
+    box.classList.remove('loading');
+    box.classList.add('checked');
+    captchaState[id] = true;
+    document.getElementById('captcha-' + id + '-err').classList.remove('show');
+  }, 1200 + Math.random() * 600);
+}
+
+function checkStrength(pw) {
+  const fill = document.getElementById('strength-fill');
+  const label = document.getElementById('strength-label');
+  const checks = {
+    len:     pw.length >= 8,
+    upper:   /[A-Z]/.test(pw),
+    num:     /[0-9]/.test(pw),
+    special: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(pw)
+  };
+  const score = Object.values(checks).filter(Boolean).length;
+  const levels = ['','weak','fair','good','strong'];
+  const labelText = ['','Weak','Fair','Good','Strong'];
+  fill.className = 'strength-fill ' + (score > 0 ? levels[score] : '');
+  label.className = 'strength-label ' + (score > 0 ? levels[score] : '');
+  label.textContent = pw.length > 0 ? labelText[score] : '';
+
+  Object.entries(checks).forEach(([key, met]) => {
+    const el = document.getElementById('hint-' + key);
+    if (!el) return;
+    el.classList.toggle('met', met);
+    el.querySelector('svg').innerHTML = met
+      ? '<polyline points="20 6 9 17 4 12"/>'
+      : '<circle cx="12" cy="12" r="10"/>';
+  });
+}
+
+function showAlert(id, msg, type) {
+  const el = document.getElementById(id);
+  el.textContent = msg;
+  el.className = 'alert ' + type + ' show';
+  setTimeout(() => el.classList.remove('show'), 5000);
+}
+
+function setLoading(btnId, loading) {
+  const btn = document.getElementById(btnId);
+  btn.disabled = loading;
+  btn.classList.toggle('loading', loading);
+}
+
+async function doLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const password = document.getElementById('login-password').value;
+  let valid = true;
+
+  document.getElementById('login-email-err').classList.remove('show');
+  document.getElementById('captcha-login-err').classList.remove('show');
+
+  if (!email || !email.includes('@')) {
+    document.getElementById('login-email-err').classList.add('show');
+    valid = false;
+  }
+  if (!captchaState.login) {
+    document.getElementById('captcha-login-err').classList.add('show');
+    valid = false;
+  }
+  if (!valid) return;
+
+  setLoading('login-btn', true);
+  try {
+    const res = await fetch('/api/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Login failed');
+    localStorage.setItem('token', data.token);
+    localStorage.setItem('email', data.email);
+    showAlert('login-alert', 'Login successful! Redirecting…', 'success');
+    setTimeout(() => window.location.href = '/dashboard', 1000);
+  } catch (e) {
+    showAlert('login-alert', e.message, 'error');
+    setLoading('login-btn', false);
+  }
+}
+
+async function doRegister() {
+  const email    = document.getElementById('reg-email').value.trim();
+  const password = document.getElementById('reg-password').value;
+  const confirm  = document.getElementById('reg-confirm').value;
+  let valid = true;
+
+  document.getElementById('reg-email-err').classList.remove('show');
+  document.getElementById('reg-confirm-err').classList.remove('show');
+  document.getElementById('captcha-reg-err').classList.remove('show');
+
+  if (!email || !email.includes('@')) {
+    document.getElementById('reg-email-err').classList.add('show'); valid = false;
+  }
+  if (password !== confirm) {
+    document.getElementById('reg-confirm-err').classList.add('show'); valid = false;
+  }
+  if (!captchaState.reg) {
+    document.getElementById('captcha-reg-err').classList.add('show'); valid = false;
+  }
+  if (!valid) return;
+
+  setLoading('register-btn', true);
+  try {
+    const res = await fetch('/api/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Registration failed');
+    localStorage.setItem('token', data.token);
+    localStorage.setItem('email', data.email);
+    showAlert('register-alert', 'Account created! Redirecting…', 'success');
+    setTimeout(() => window.location.href = '/dashboard', 1000);
+  } catch (e) {
+    showAlert('register-alert', e.message, 'error');
+    setLoading('register-btn', false);
+  }
+}
+
+// Enter key support
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Enter') return;
+  const active = document.querySelector('.tab-content.active').id;
+  if (active === 'tab-login') doLogin();
+  else doRegister();
+});
+</script>
+</body>
+</html>

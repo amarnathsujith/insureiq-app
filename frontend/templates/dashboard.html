@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>InsureIQ — Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --blue-950:#0a1628;--blue-900:#0d1f3c;--blue-800:#112d56;--blue-700:#1a3f73;
+  --blue-600:#1d4ed8;--blue-500:#3b82f6;--blue-400:#60a5fa;--blue-300:#93c5fd;
+  --blue-100:#dbeafe;--blue-50:#eff6ff;
+  --surface:rgba(255,255,255,0.04);--surface2:rgba(255,255,255,0.07);
+  --border:rgba(96,165,250,0.15);--border2:rgba(148,163,184,0.2);
+  --text:#f8fafc;--text-muted:#94a3b8;--text-dim:#64748b;
+  --success:#22c55e;--warning:#f59e0b;--danger:#ef4444;
+  --radius:12px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+body{
+  font-family:'DM Sans',sans-serif;background:var(--blue-950);
+  color:var(--text);min-height:100vh;
+}
+
+/* Layout */
+.layout{display:flex;min-height:100vh}
+.sidebar{
+  width:260px;flex-shrink:0;
+  background:rgba(13,31,60,0.95);
+  border-right:1px solid var(--border);
+  display:flex;flex-direction:column;
+  padding:1.5rem 0;position:fixed;height:100vh;
+  backdrop-filter:blur(10px);z-index:100;
+}
+.main{margin-left:260px;flex:1;display:flex;flex-direction:column;min-height:100vh}
+
+/* Sidebar */
+.sidebar-brand{
+  padding:0 1.5rem 1.5rem;
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:0.75rem;
+}
+.brand-icon{
+  width:38px;height:38px;border-radius:10px;
+  background:linear-gradient(135deg,var(--blue-600),var(--blue-400));
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.brand-icon svg{width:18px;height:18px}
+.sidebar-brand h2{
+  font-family:'Space Grotesk',sans-serif;
+  font-size:1.15rem;font-weight:700;color:var(--text);
+}
+.sidebar-nav{padding:1.25rem 0.75rem;flex:1}
+.nav-section{font-size:0.65rem;font-weight:700;letter-spacing:0.1em;color:var(--text-dim);
+  text-transform:uppercase;padding:0.75rem 0.75rem 0.4rem;margin-top:0.5rem}
+.nav-item{
+  display:flex;align-items:center;gap:0.75rem;
+  padding:0.7rem 0.875rem;border-radius:9px;
+  font-size:0.9rem;font-weight:500;color:var(--text-muted);
+  cursor:pointer;transition:all 0.2s;margin-bottom:2px;
+  border:none;background:none;width:100%;text-align:left;
+}
+.nav-item svg{width:17px;height:17px;flex-shrink:0}
+.nav-item:hover{background:var(--surface2);color:var(--text)}
+.nav-item.active{background:rgba(29,78,216,0.2);color:var(--blue-400);
+  border:1px solid rgba(59,130,246,0.2)}
+.sidebar-footer{padding:1rem 1.5rem;border-top:1px solid var(--border)}
+.user-info{display:flex;align-items:center;gap:0.75rem;margin-bottom:0.875rem}
+.user-avatar{
+  width:36px;height:36px;border-radius:50%;
+  background:linear-gradient(135deg,var(--blue-700),var(--blue-500));
+  display:flex;align-items:center;justify-content:center;
+  font-weight:700;font-size:0.8rem;color:#fff;flex-shrink:0;
+}
+.user-email{font-size:0.78rem;color:var(--text-muted);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px}
+.btn-logout{
+  width:100%;padding:0.6rem;border-radius:8px;
+  background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.2);
+  color:#fca5a5;font-size:0.8rem;font-weight:500;cursor:pointer;transition:all 0.2s;
+  display:flex;align-items:center;justify-content:center;gap:0.5rem;
+}
+.btn-logout:hover{background:rgba(239,68,68,0.2)}
+.btn-logout svg{width:14px;height:14px}
+
+/* Topbar */
+.topbar{
+  height:64px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 2rem;background:rgba(10,22,40,0.8);backdrop-filter:blur(10px);
+  position:sticky;top:0;z-index:50;
+}
+.topbar-title{font-family:'Space Grotesk',sans-serif;font-size:1.15rem;font-weight:600}
+.topbar-actions{display:flex;gap:0.75rem;align-items:center}
+.badge{
+  padding:0.3rem 0.75rem;border-radius:20px;font-size:0.75rem;font-weight:600;
+  background:rgba(29,78,216,0.2);border:1px solid rgba(59,130,246,0.3);color:var(--blue-300);
+}
+
+/* Content */
+.content{flex:1;padding:2rem;overflow-y:auto}
+.page{display:none}
+.page.active{display:block;animation:fadeIn 0.3s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* Stats cards */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:2rem}
+.stat-card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius);padding:1.25rem;
+  transition:all 0.2s;
+}
+.stat-card:hover{background:var(--surface2);border-color:rgba(96,165,250,0.3)}
+.stat-label{font-size:0.75rem;font-weight:600;color:var(--text-muted);
+  text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.5rem}
+.stat-value{font-family:'Space Grotesk',sans-serif;font-size:1.75rem;font-weight:700;
+  color:var(--blue-400)}
+.stat-sub{font-size:0.75rem;color:var(--text-dim);margin-top:0.25rem}
+
+/* Predict form */
+.predict-container{display:grid;grid-template-columns:1fr 360px;gap:1.5rem}
+.form-card,.result-card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:16px;padding:1.75rem;
+}
+.card-title{
+  font-family:'Space Grotesk',sans-serif;font-size:1.1rem;font-weight:600;
+  margin-bottom:1.5rem;display:flex;align-items:center;gap:0.6rem;
+  color:var(--text);
+}
+.card-title svg{width:18px;height:18px;color:var(--blue-400)}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem}
+.form-group{display:flex;flex-direction:column;gap:0.45rem}
+.form-group.full{grid-column:span 2}
+.form-group label{
+  font-size:0.75rem;font-weight:600;color:var(--text-muted);
+  text-transform:uppercase;letter-spacing:0.05em;
+}
+.form-group input,.form-group select{
+  padding:0.75rem 1rem;
+  background:rgba(255,255,255,0.05);
+  border:1px solid var(--border2);border-radius:9px;
+  color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.95rem;
+  transition:all 0.2s;outline:none;
+}
+.form-group input:focus,.form-group select:focus{
+  border-color:var(--blue-500);background:rgba(59,130,246,0.08);
+  box-shadow:0 0 0 3px rgba(59,130,246,0.12);
+}
+.form-group select option{background:#1e3a5f;color:var(--text)}
+.btn-predict{
+  margin-top:1.5rem;width:100%;padding:0.875rem;
+  background:linear-gradient(135deg,var(--blue-600),var(--blue-500));
+  color:#fff;border:none;border-radius:10px;
+  font-family:'DM Sans',sans-serif;font-size:1rem;font-weight:600;
+  cursor:pointer;transition:all 0.2s;
+  display:flex;align-items:center;justify-content:center;gap:0.5rem;
+}
+.btn-predict:hover{transform:translateY(-1px);box-shadow:0 8px 25px rgba(29,78,216,0.5)}
+.btn-predict:disabled{opacity:0.6;cursor:not-allowed;transform:none}
+.btn-spinner{
+  width:18px;height:18px;border:2px solid rgba(255,255,255,0.3);
+  border-top-color:#fff;border-radius:50%;
+  animation:spin 0.8s linear infinite;display:none;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.btn-predict.loading .btn-spinner{display:block}
+.btn-predict.loading .btn-label{display:none}
+
+/* Result card */
+.result-placeholder{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  height:280px;color:var(--text-dim);text-align:center;gap:1rem;
+}
+.result-placeholder svg{width:48px;height:48px;opacity:0.3}
+.result-placeholder p{font-size:0.9rem}
+.result-output{display:none;animation:fadeIn 0.4s ease}
+.result-amount{
+  font-family:'Space Grotesk',sans-serif;
+  font-size:3rem;font-weight:700;color:var(--blue-400);
+  text-align:center;margin:2rem 0 0.5rem;
+  line-height:1;
+}
+.result-sub{text-align:center;color:var(--text-muted);font-size:0.875rem;margin-bottom:2rem}
+.result-breakdown{border-top:1px solid var(--border);padding-top:1.25rem}
+.result-row{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:0.5rem 0;border-bottom:1px solid rgba(148,163,184,0.08);
+  font-size:0.875rem;
+}
+.result-row:last-child{border:none}
+.result-row .key{color:var(--text-muted)}
+.result-row .val{font-weight:600;color:var(--text)}
+
+/* History */
+.history-table{width:100%;border-collapse:collapse}
+.history-table th{
+  font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;
+  color:var(--text-dim);text-align:left;padding:0.75rem 1rem;
+  border-bottom:1px solid var(--border);
+}
+.history-table td{
+  padding:0.875rem 1rem;border-bottom:1px solid rgba(148,163,184,0.06);
+  font-size:0.875rem;color:var(--text-muted);
+}
+.history-table tr:hover td{background:var(--surface2);color:var(--text)}
+.history-table .charge{color:var(--blue-400);font-weight:700;font-size:0.95rem}
+.empty-state{text-align:center;padding:3rem;color:var(--text-dim)}
+.empty-state svg{width:40px;height:40px;margin:0 auto 1rem;display:block;opacity:0.3}
+
+/* Downloads */
+.download-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem}
+.download-card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius);padding:1.5rem;transition:all 0.2s;
+}
+.download-card:hover{background:var(--surface2);border-color:rgba(96,165,250,0.3)}
+.dl-icon{
+  width:44px;height:44px;border-radius:10px;
+  background:rgba(29,78,216,0.15);border:1px solid rgba(59,130,246,0.2);
+  display:flex;align-items:center;justify-content:center;margin-bottom:1rem;
+}
+.dl-icon svg{width:20px;height:20px;color:var(--blue-400)}
+.dl-title{font-weight:600;font-size:0.95rem;margin-bottom:0.4rem}
+.dl-desc{font-size:0.8rem;color:var(--text-muted);line-height:1.5;margin-bottom:1.25rem}
+.btn-download{
+  width:100%;padding:0.65rem;
+  background:linear-gradient(135deg,var(--blue-700),var(--blue-600));
+  border:1px solid rgba(59,130,246,0.3);color:#fff;border-radius:8px;
+  font-size:0.85rem;font-weight:500;cursor:pointer;transition:all 0.2s;
+  display:flex;align-items:center;justify-content:center;gap:0.5rem;
+}
+.btn-download:hover{background:linear-gradient(135deg,var(--blue-600),var(--blue-500));transform:translateY(-1px)}
+.btn-download svg{width:14px;height:14px}
+.retrain-card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius);padding:1.5rem;margin-top:1.25rem;
+}
+.retrain-info{font-size:0.875rem;color:var(--text-muted);margin-bottom:1rem;line-height:1.6}
+.btn-retrain{
+  padding:0.7rem 1.5rem;
+  background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.3);
+  color:#86efac;border-radius:8px;
+  font-size:0.875rem;font-weight:500;cursor:pointer;transition:all 0.2s;
+  display:inline-flex;align-items:center;gap:0.5rem;
+}
+.btn-retrain:hover{background:rgba(34,197,94,0.2)}
+.btn-retrain svg{width:15px;height:15px}
+.alert{
+  padding:0.875rem 1rem;border-radius:9px;
+  font-size:0.85rem;margin-bottom:1rem;display:none;
+  animation:fadeIn 0.3s ease;
+}
+.alert.show{display:block}
+.alert.error{background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);color:#fca5a5}
+.alert.success{background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.3);color:#86efac}
+
+@media(max-width:1100px){
+  .stats-grid{grid-template-columns:repeat(2,1fr)}
+  .predict-container{grid-template-columns:1fr}
+  .download-grid{grid-template-columns:1fr}
+}
+@media(max-width:768px){
+  .sidebar{transform:translateX(-100%)}
+  .main{margin-left:0}
+  .stats-grid{grid-template-columns:1fr 1fr}
+  .form-grid{grid-template-columns:1fr}
+  .form-group.full{grid-column:1}
+}
+</style>
+</head>
+<body>
+<div class="layout">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-icon">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+        </svg>
+      </div>
+      <h2>InsureIQ</h2>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section">Main</div>
+      <button class="nav-item active" onclick="showPage('predict',this)">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+        Predict Charges
+      </button>
+      <button class="nav-item" onclick="showPage('history',this)">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 3h18v18H3z"/><path d="M8 10h8M8 14h5"/></svg>
+        Prediction History
+      </button>
+      <div class="nav-section">Data</div>
+      <button class="nav-item" onclick="showPage('downloads',this)">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Download Data
+      </button>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-info">
+        <div class="user-avatar" id="user-avatar">U</div>
+        <div class="user-email" id="user-email-display">user@email.com</div>
+      </div>
+      <button class="btn-logout" onclick="doLogout()">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Sign Out
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <div class="main">
+    <header class="topbar">
+      <div class="topbar-title" id="page-title">Predict Insurance Charges</div>
+      <div class="topbar-actions">
+        <span class="badge" id="topbar-email"></span>
+      </div>
+    </header>
+
+    <div class="content">
+
+      <!-- PREDICT PAGE -->
+      <div class="page active" id="page-predict">
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-label">Total Predictions</div>
+            <div class="stat-value" id="stat-total">—</div>
+            <div class="stat-sub">All time</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Average Charge</div>
+            <div class="stat-value" id="stat-avg">—</div>
+            <div class="stat-sub">Your history</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Highest Estimate</div>
+            <div class="stat-value" id="stat-max">—</div>
+            <div class="stat-sub">Your highest</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Dataset Records</div>
+            <div class="stat-value" id="stat-new">—</div>
+            <div class="stat-sub">New inputs collected</div>
+          </div>
+        </div>
+
+        <div class="predict-container">
+          <div class="form-card">
+            <div class="card-title">
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+              Patient Information
+            </div>
+            <div class="alert" id="predict-alert"></div>
+            <div class="form-grid">
+              <div class="form-group">
+                <label>Age</label>
+                <input type="number" id="f-age" value="30" min="1" max="100" placeholder="e.g. 30">
+              </div>
+              <div class="form-group">
+                <label>Gender</label>
+                <select id="f-sex">
+                  <option value="male">Male</option>
+                  <option value="female">Female</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>BMI</label>
+                <input type="number" id="f-bmi" step="0.1" value="25.5" placeholder="e.g. 22.0">
+              </div>
+              <div class="form-group">
+                <label>Dependents</label>
+                <input type="number" id="f-children" value="0" min="0" max="10" placeholder="0">
+              </div>
+              <div class="form-group">
+                <label>Smoker Status</label>
+                <select id="f-smoker">
+                  <option value="no">Non-smoker</option>
+                  <option value="yes">Smoker</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Region</label>
+                <select id="f-region">
+                  <option value="southwest">Southwest</option>
+                  <option value="southeast">Southeast</option>
+                  <option value="northwest">Northwest</option>
+                  <option value="northeast">Northeast</option>
+                </select>
+              </div>
+            </div>
+            <button class="btn-predict" id="predict-btn" onclick="doPrediction()">
+              <div class="btn-spinner"></div>
+              <span class="btn-label">Calculate Estimate</span>
+            </button>
+          </div>
+
+          <div class="result-card">
+            <div class="card-title">
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+              Estimate Result
+            </div>
+            <div class="result-placeholder" id="result-placeholder">
+              <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+              <p>Enter patient details and click<br>Calculate to see the estimate</p>
+            </div>
+            <div class="result-output" id="result-output">
+              <div class="result-amount" id="result-amount">$0.00</div>
+              <div class="result-sub">Estimated Annual Insurance Charge</div>
+              <div class="result-breakdown" id="result-breakdown"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- HISTORY PAGE -->
+      <div class="page" id="page-history">
+        <div class="form-card" style="padding:0">
+          <div style="padding:1.5rem 1.75rem;border-bottom:1px solid var(--border)">
+            <div class="card-title" style="margin:0">
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 3h18v18H3z"/><path d="M8 10h8M8 14h5"/></svg>
+              Your Prediction History
+            </div>
+          </div>
+          <div id="history-container">
+            <div class="empty-state">
+              <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M3 3h18v18H3z"/></svg>
+              <p>No predictions yet. Make your first prediction!</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DOWNLOADS PAGE -->
+      <div class="page" id="page-downloads">
+        <div class="download-grid">
+          <div class="download-card">
+            <div class="dl-icon">
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            </div>
+            <div class="dl-title">New Inputs CSV</div>
+            <div class="dl-desc">Download all new prediction inputs collected since the original dataset. Includes predicted charges, timestamps, and user email.</div>
+            <button class="btn-download" onclick="downloadCSV('new-inputs')">
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Download new_insurance_inputs.csv
+            </button>
+          </div>
+          <div class="download-card">
+            <div class="dl-icon">
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+            </div>
+            <div class="dl-title">Updated Dataset</div>
+            <div class="dl-desc">Download the full insurance dataset merged with all new prediction inputs. Use this for retraining the model with more data.</div>
+            <button class="btn-download" onclick="downloadCSV('updated-dataset')">
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Download updated_insurance_dataset.csv
+            </button>
+          </div>
+        </div>
+
+        <div class="retrain-card">
+          <div class="card-title">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+            Retrain Model
+          </div>
+          <div class="retrain-info">
+            Retrain the XGBoost prediction model using the original dataset. New input data collected via predictions will help improve future accuracy over time as more data accumulates.
+          </div>
+          <div class="alert" id="retrain-alert"></div>
+          <button class="btn-retrain" onclick="doRetrain()" id="retrain-btn">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+            Retrain Now
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+const token = localStorage.getItem('token');
+const email = localStorage.getItem('email') || 'user@insureiq.com';
+
+// Auth guard
+if (!token) window.location.href = '/';
+
+// Set user info
+document.getElementById('user-email-display').textContent = email;
+document.getElementById('topbar-email').textContent = email;
+const initials = email.split('@')[0].substring(0,2).toUpperCase();
+document.getElementById('user-avatar').textContent = initials;
+
+function authHeaders() {
+  return { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token };
+}
+
+function showAlert(id, msg, type) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.textContent = msg;
+  el.className = 'alert ' + type + ' show';
+  setTimeout(() => el.classList.remove('show'), 5000);
+}
+
+function showPage(name, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  btn.classList.add('active');
+  const titles = { predict:'Predict Insurance Charges', history:'Prediction History', downloads:'Download Data' };
+  document.getElementById('page-title').textContent = titles[name] || '';
+  if (name === 'history') loadHistory();
+}
+
+// ── Load Stats ──
+async function loadStats() {
+  try {
+    const res = await fetch('/api/stats', { headers: authHeaders() });
+    if (!res.ok) return;
+    const d = await res.json();
+    document.getElementById('stat-total').textContent = d.total_predictions;
+    document.getElementById('stat-avg').textContent = d.average_charge > 0 ? '$' + d.average_charge.toLocaleString('en-US',{maximumFractionDigits:0}) : '—';
+    document.getElementById('stat-max').textContent = d.max_charge > 0 ? '$' + d.max_charge.toLocaleString('en-US',{maximumFractionDigits:0}) : '—';
+    document.getElementById('stat-new').textContent = d.total_new_inputs;
+  } catch(e) {}
+}
+loadStats();
+
+// ── Predict ──
+async function doPrediction() {
+  const btn = document.getElementById('predict-btn');
+  btn.disabled = true;
+  btn.classList.add('loading');
+
+  const data = {
+    age:      parseInt(document.getElementById('f-age').value),
+    sex:      document.getElementById('f-sex').value,
+    bmi:      parseFloat(document.getElementById('f-bmi').value),
+    children: parseInt(document.getElementById('f-children').value),
+    smoker:   document.getElementById('f-smoker').value,
+    region:   document.getElementById('f-region').value
+  };
+
+  try {
+    const res = await fetch('/api/predict', {
+      method: 'POST',
+      headers: authHeaders(),
+      body: JSON.stringify(data)
+    });
+    const result = await res.json();
+    if (!res.ok) throw new Error(result.error || 'Prediction failed');
+
+    const amount = result.estimated_charges;
+    document.getElementById('result-placeholder').style.display = 'none';
+    document.getElementById('result-output').style.display = 'block';
+    document.getElementById('result-amount').textContent =
+      '$' + amount.toLocaleString('en-US', { minimumFractionDigits:2, maximumFractionDigits:2 });
+
+    const bmiCategory = data.bmi < 18.5 ? 'Underweight' : data.bmi < 25 ? 'Normal' : data.bmi < 30 ? 'Overweight' : 'Obese';
+    document.getElementById('result-breakdown').innerHTML = `
+      <div class="result-row"><span class="key">Age</span><span class="val">${data.age} years</span></div>
+      <div class="result-row"><span class="key">Gender</span><span class="val">${data.sex.charAt(0).toUpperCase()+data.sex.slice(1)}</span></div>
+      <div class="result-row"><span class="key">BMI</span><span class="val">${data.bmi} (${bmiCategory})</span></div>
+      <div class="result-row"><span class="key">Dependents</span><span class="val">${data.children}</span></div>
+      <div class="result-row"><span class="key">Smoker</span><span class="val">${data.smoker === 'yes' ? '🚬 Yes' : '✅ No'}</span></div>
+      <div class="result-row"><span class="key">Region</span><span class="val">${data.region.charAt(0).toUpperCase()+data.region.slice(1)}</span></div>
+    `;
+    loadStats();
+  } catch(e) {
+    showAlert('predict-alert', e.message, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.classList.remove('loading');
+  }
+}
+
+// ── History ──
+async function loadHistory() {
+  try {
+    const res = await fetch('/api/history', { headers: authHeaders() });
+    const data = await res.json();
+    const container = document.getElementById('history-container');
+    if (!data.length) {
+      container.innerHTML = '<div class="empty-state"><svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M3 3h18v18H3z"/></svg><p>No predictions yet.</p></div>';
+      return;
+    }
+    container.innerHTML = `<table class="history-table">
+      <thead><tr>
+        <th>#</th><th>Age</th><th>Sex</th><th>BMI</th><th>Children</th><th>Smoker</th><th>Region</th><th>Estimated Charge</th><th>Date</th>
+      </tr></thead>
+      <tbody>${data.map((r,i) => `
+        <tr>
+          <td>${i+1}</td>
+          <td>${r.age}</td><td>${r.sex}</td><td>${r.bmi}</td><td>${r.children}</td>
+          <td>${r.smoker}</td><td>${r.region}</td>
+          <td class="charge">$${Number(r.predicted_charge).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
+          <td>${new Date(r.created_at).toLocaleDateString()}</td>
+        </tr>`).join('')}
+      </tbody></table>`;
+  } catch(e) {}
+}
+
+// ── Downloads ──
+async function downloadCSV(type) {
+  const res = await fetch('/api/download/' + type, { headers: authHeaders() });
+  if (!res.ok) {
+    const d = await res.json();
+    showAlert('retrain-alert', d.error || 'Download failed', 'error');
+    return;
+  }
+  const blob = await res.blob();
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = type === 'new-inputs' ? 'new_insurance_inputs.csv' : 'updated_insurance_dataset.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ── Retrain ──
+async function doRetrain() {
+  const btn = document.getElementById('retrain-btn');
+  btn.disabled = true;
+  btn.textContent = 'Retraining…';
+  try {
+    const res = await fetch('/api/retrain', { method:'POST', headers: authHeaders() });
+    const d = await res.json();
+    if (!res.ok) throw new Error(d.error);
+    showAlert('retrain-alert', `Model retrained successfully! Test R²: ${d.test_r2}`, 'success');
+  } catch(e) {
+    showAlert('retrain-alert', e.message, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg> Retrain Now';
+  }
+}
+
+// ── Logout ──
+async function doLogout() {
+  try {
+    await fetch('/api/logout', { method:'POST', headers: authHeaders() });
+  } catch(e) {}
+  localStorage.removeItem('token');
+  localStorage.removeItem('email');
+  window.location.href = '/';
+}
+</script>
+</body>
+</html>
